@@ -4,68 +4,87 @@
 
 This document describes the testing strategy for both local development and verifying deployed environments. Tests use a **mock LLM by default** to ensure fast, deterministic, cost-free testing.
 
-## Core Principle: Mock by Default
+## Core Principles
 
-All acceptance tests run against a mock LLM implementation that returns stubbed responses. This provides:
-
-- **Fast execution** - No network calls, tests complete in milliseconds
-- **Deterministic results** - Same input always produces same output
-- **No API costs** - No Anthropic API calls during testing
-- **No API key required** - Developers can run tests immediately
-- **CI-friendly** - Tests can run on every commit without rate limits or costs
-
-Real LLM integration is tested manually or via optional integration tests.
+1. **Mock by Default** - All acceptance tests run against a mock LLM adapter
+2. **Test After Every Change** - Acceptance tests run on every commit/change
+3. **No API Key Required** - Developers can run all acceptance tests without an Anthropic API key
+4. **Test Business Logic** - TranslationService contains testable business logic, isolated from LLM
 
 ## Architecture for Testability
 
-The system uses dependency injection to swap LLM implementations:
+The system uses hexagonal architecture with a port for LLM interaction:
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              TranslationService                      │
-│                 (interface)                          │
+│                  GraphQL Resolver                    │
+│               (src/server.ts)                        │
 └──────────────────────┬──────────────────────────────┘
-                       │
+                       │ uses
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│              TranslationService                      │
+│         (our business logic - testable)              │
+│         src/domain/translation-service.ts            │
+└──────────────────────┬──────────────────────────────┘
+                       │ uses (via port)
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│                   LlmClient                          │
+│              (port/interface)                        │
+│            src/domain/llm-client.ts                  │
+└──────────────────────┬──────────────────────────────┘
+                       │ implemented by
          ┌─────────────┴─────────────┐
          │                           │
          ▼                           ▼
 ┌─────────────────┐       ┌─────────────────┐
-│ MockTranslation │       │ LlmTranslation  │
-│    Service      │       │    Service      │
-│  (for tests)    │       │ (for production)│
+│  MockLlmClient  │       │ ClaudeLlmClient │
+│   (for tests)   │       │ (for production)│
 └─────────────────┘       └─────────────────┘
 ```
 
-The test server injects `MockTranslationService`, while production uses `LlmTranslationService`.
+**Key points:**
+- `TranslationService` contains our business logic (parsing, formatting, validation)
+- `LlmClient` is the port that abstracts LLM interaction
+- Tests inject `MockLlmClient`, production uses `ClaudeLlmClient`
+- Business logic in `TranslationService` is fully testable without any LLM calls
 
 ## Test Categories
 
 ### 1. Acceptance Tests (Primary)
 
-Acceptance tests verify the GraphQL API contract using the mock LLM.
+Acceptance tests verify the full system behavior using the mock LLM adapter.
 
 **Location:** `tests/acceptance/`
 
 **What they test:**
 - GraphQL query structure and response format
+- TranslationService business logic
 - Word-by-word breakdown contains required fields
 - Grammatical forms and meanings are present
 - Error handling for invalid input
 
-**Execution:** Fast, no external dependencies.
+**Execution:**
+- Run after every change
+- Fast, no external dependencies
+- No API key required
 
-### 2. Integration Tests (Optional, Manual)
+### 2. Integration Tests (Pre-Production)
 
-Integration tests verify the real LLM produces valid responses.
+A small number of integration tests verify correct integration with the real LLM. These are automated and run as part of any production deployment.
 
 **Location:** `tests/integration/`
 
-**When to run:**
-- Before major releases
-- When changing LLM prompts
-- When upgrading Anthropic SDK
+**What they test:**
+- ClaudeLlmClient correctly calls the Anthropic API
+- Response parsing works with real LLM output
+- Basic end-to-end flow with real LLM
 
-**Execution:** Requires `ANTHROPIC_API_KEY`, incurs API costs.
+**Execution:**
+- Automated, runs before every production deploy
+- Requires `ANTHROPIC_API_KEY`
+- Kept minimal to control costs (only a few tests)
 
 ### 3. Unit Tests (As Needed)
 
@@ -74,21 +93,32 @@ Unit tests for complex logic that benefits from isolation.
 **Location:** `tests/unit/`
 
 **When to use:**
-- Complex parsing or transformation logic
+- Complex parsing or transformation logic in TranslationService
 - Error handling edge cases
 
 ## Mock LLM Implementation
 
-### Stubbed Responses
+### MockLlmClient
 
-The mock returns pre-defined responses for known test sutras:
+The mock adapter returns pre-defined responses for known test sutras:
 
 ```typescript
-// tests/mocks/mock-translation-service.ts
+// src/adapters/mock-llm-client.ts
 
-const stubbedResponses: Record<string, TranslationResult> = {
+export class MockLlmClient implements LlmClient {
+  private stubbedResponses: Map<string, LlmResponse>;
+
+  async translate(sutra: string): Promise<LlmResponse> {
+    return this.stubbedResponses.get(sutra) ?? this.genericResponse(sutra);
+  }
+}
+```
+
+### Stubbed Responses
+
+```typescript
+const stubbedResponses = {
   'atha yogānuśāsanam': {
-    originalText: 'atha yogānuśāsanam',
     words: [
       {
         word: 'atha',
@@ -115,7 +145,7 @@ For sutras not in the stub list, the mock returns a generic valid response struc
 ### Prerequisites
 
 1. **Node.js** (v18 or later)
-2. No API key required for standard tests
+2. No API key required
 
 ### Environment Setup
 
@@ -127,7 +157,7 @@ npm install
 ### Running Tests
 
 ```bash
-# Run all tests (uses mock LLM)
+# Run all acceptance tests (uses mock LLM, no API key needed)
 npm test
 
 # Run tests in watch mode
@@ -137,7 +167,9 @@ npm run test:watch
 npx vitest run tests/acceptance/word-translation.test.ts
 ```
 
-### Running Integration Tests (Optional)
+### Running Integration Tests Locally
+
+Integration tests run automatically in CI before production deploys, but can also be run locally:
 
 ```bash
 # Set API key for real LLM tests
@@ -179,7 +211,7 @@ Returns `200 OK` with `{"status": "healthy"}` when operational.
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Only for integration tests | API key for Claude |
+| `ANTHROPIC_API_KEY` | For integration tests and production | API key for Claude |
 | `GRAPHQL_ENDPOINT` | No | Override endpoint for deployed testing |
 
 ### vitest.config.ts
@@ -200,25 +232,28 @@ Returns `200 OK` with `{"status": "healthy"}` when operational.
 
 ### Adding New Test Cases
 
-1. Add the sutra and expected response to `tests/mocks/stubbed-responses.ts`
+1. Add the sutra and expected response to `src/adapters/mock-llm-client.ts`
 2. Write the acceptance test using that sutra
 3. The mock will return the stubbed response
 
 ## CI/CD
 
-### Default Pipeline
+### Every Change (PR/Commit)
 
 ```yaml
 - npm install
-- npm test          # Runs acceptance tests with mock (fast, free)
+- npm test          # Acceptance tests with mock (fast, free, no API key)
 - npm run build     # Type check and build
 ```
 
-### Optional: Periodic Integration Tests
-
-Run integration tests on a schedule (e.g., weekly) or before releases:
+### Production Deployment
 
 ```yaml
-# Scheduled job with API key secret
-- npm run test:integration
+- npm install
+- npm test                  # Acceptance tests (mock)
+- npm run build
+- npm run test:integration  # Integration tests with real LLM (requires ANTHROPIC_API_KEY)
+- deploy to production
 ```
+
+Integration tests run automatically before any production deploy to verify LLM integration is working correctly.
