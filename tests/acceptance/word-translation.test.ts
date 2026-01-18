@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { createTestServer } from '../helpers/test-server';
+import { TranslationResult } from '../../src/domain/types';
+
+/**
+ * Response type for the translateSutra query.
+ */
+interface TranslateSutraResponse {
+  translateSutra: TranslationResult;
+}
 
 /**
  * Acceptance test for the first Gherkin scenario:
@@ -17,7 +25,7 @@ describe('Display word meanings for a simple sutra', () => {
 
     // When I submit the sutra for translation
     const server = createTestServer();
-    const response = await server.executeQuery({
+    const response = await server.executeQuery<TranslateSutraResponse>({
       query: `
         query TranslateSutra($sutra: String!) {
           translateSutra(sutra: $sutra) {

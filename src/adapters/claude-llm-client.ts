@@ -1,6 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
+import * as path from 'path';
 import { LlmClient, LlmTranslationResponse } from '../domain/llm-client';
 import { WordEntry } from '../domain/types';
+import { PromptLoader } from './prompt-loader';
 
 /**
  * Error thrown when Claude LLM operations fail.
@@ -13,29 +15,50 @@ export class ClaudeLlmError extends Error {
 }
 
 /**
+ * Configuration options for ClaudeLlmClient.
+ */
+export interface ClaudeLlmClientOptions {
+  /** The Anthropic API key. If not provided, uses ANTHROPIC_API_KEY environment variable. */
+  apiKey?: string;
+  /** Custom PromptLoader instance. If not provided, uses default prompts directory. */
+  promptLoader?: PromptLoader;
+}
+
+/**
  * Claude-powered implementation of the LlmClient interface.
  *
  * This adapter uses the Anthropic SDK to send Sanskrit sutras to Claude
- * for word-by-word translation with grammatical analysis.
+ * for word-by-word translation with grammatical analysis. Prompts are loaded
+ * from external configuration files via PromptLoader.
  */
 export class ClaudeLlmClient implements LlmClient {
   private readonly client: Anthropic;
   private readonly model = 'claude-sonnet-4-20250514';
+  private readonly promptLoader: PromptLoader;
 
   /**
    * Creates a new ClaudeLlmClient instance.
    *
-   * @param apiKey - The Anthropic API key. If not provided, uses ANTHROPIC_API_KEY environment variable.
+   * @param options - Configuration options including API key and prompt loader
    * @throws ClaudeLlmError if no API key is available
    */
-  constructor(apiKey?: string) {
-    const resolvedApiKey = apiKey ?? process.env.ANTHROPIC_API_KEY;
+  constructor(options: ClaudeLlmClientOptions = {}) {
+    const resolvedApiKey = options.apiKey ?? process.env.ANTHROPIC_API_KEY;
 
     if (!resolvedApiKey) {
       throw new ClaudeLlmError('ANTHROPIC_API_KEY is required');
     }
 
     this.client = new Anthropic({ apiKey: resolvedApiKey });
+    this.promptLoader = options.promptLoader ?? this.createDefaultPromptLoader();
+  }
+
+  /**
+   * Creates the default PromptLoader using the standard prompts directory.
+   */
+  private createDefaultPromptLoader(): PromptLoader {
+    const promptsDir = path.join(process.cwd(), 'prompts');
+    return new PromptLoader(promptsDir);
   }
 
   /**
@@ -72,27 +95,12 @@ export class ClaudeLlmClient implements LlmClient {
 
   /**
    * Builds the prompt for Claude to analyze Sanskrit text.
+   *
+   * Loads the prompt template from the configuration file and substitutes
+   * the sutra variable.
    */
   private buildPrompt(sutra: string): string {
-    return `You are a Sanskrit scholar. Analyze the following Sanskrit sutra and provide a word-by-word breakdown.
-
-For each word, provide:
-1. The word itself (in IAST transliteration)
-2. Its grammatical form (e.g., "noun, masculine, nominative, singular" or "verb, present, active, third person, singular")
-3. One or more English meanings
-
-Sanskrit sutra: "${sutra}"
-
-Respond ONLY with a JSON object in this exact format (no markdown, no explanation):
-{
-  "words": [
-    {
-      "word": "the sanskrit word",
-      "grammaticalForm": "grammatical description",
-      "meanings": ["meaning1", "meaning2"]
-    }
-  ]
-}`;
+    return this.promptLoader.buildPrompt('sanskrit-translation', { sutra });
   }
 
   /**
