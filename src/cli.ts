@@ -15,13 +15,12 @@ function parseArgs(args: string[]): { useMock: boolean; sutra: string | null } {
 /**
  * Creates the appropriate LLM client based on configuration.
  */
-function createClient(useMock: boolean): LlmClient {
+async function createClient(useMock: boolean): Promise<LlmClient> {
   if (useMock) {
     return new MockLlmClient();
   }
   // Lazy load Claude client only when needed
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { ClaudeLlmClient } = require('./adapters/claude-llm-client');
+  const { ClaudeLlmClient } = await import('./adapters/claude-llm-client.js');
   return new ClaudeLlmClient();
 }
 
@@ -38,7 +37,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const client = createClient(useMock);
+  const client = await createClient(useMock);
   const service = new LlmTranslationService(client);
 
   const result = await service.translate(sutra);
