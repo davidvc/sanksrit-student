@@ -21,7 +21,7 @@ interface TranslateSutraResponse {
 describe('Display word meanings for a simple sutra', () => {
   it('should return word-by-word breakdown with grammatical forms and meanings', async () => {
     // Given I have a Sanskrit sutra in IAST transliteration
-    const sutra = 'atha yogānuśāsanam';
+    const sutra = 'atha yoganuasanam';
 
     // When I submit the sutra for translation
     const server = createTestServer();
