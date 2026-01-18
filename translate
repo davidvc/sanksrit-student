@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# CLI wrapper for Sanskrit translation service
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+if [[ ! -f "$SCRIPT_DIR/dist/cli.cjs" ]]; then
+  echo "CLI not built. Run: npm run build:cli" >&2
+  exit 1
+fi
+
+exec node "$SCRIPT_DIR/dist/cli.cjs" "$@"
