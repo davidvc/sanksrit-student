@@ -10,6 +10,83 @@ This document describes the testing strategy for both local development and veri
 2. **Test After Every Change** - Acceptance tests run on every commit/change
 3. **No API Key Required** - Developers can run all acceptance tests without an Anthropic API key
 4. **Test Business Logic** - TranslationService contains testable business logic, isolated from LLM
+5. **In-Process Testing** - Tests execute GraphQL queries directly without HTTP, enabling parallel execution
+
+## In-Process Test Execution
+
+**Decision:** Acceptance tests execute GraphQL queries in-process rather than over HTTP.
+
+**Rationale:**
+- **No port conflicts** - Multiple test suites can run in parallel without port binding issues
+- **Faster execution** - No HTTP overhead, no server startup/teardown
+- **Better isolation** - Each test gets its own instance of the schema and dependencies
+- **Simpler debugging** - Stack traces go directly through test code
+
+**How it works:**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        Test Process                           │
+│                                                               │
+│  ┌─────────┐     ┌──────────────┐     ┌─────────────────┐    │
+│  │  Test   │────▶│ GraphQL      │────▶│ Translation     │    │
+│  │         │     │ execute()    │     │ Service         │    │
+│  └─────────┘     └──────────────┘     └────────┬────────┘    │
+│                   (in-process)                  │             │
+│                                                 ▼             │
+│                                        ┌─────────────────┐    │
+│                                        │ MockLlmClient   │    │
+│                                        │ (in-process)    │    │
+│                                        └─────────────────┘    │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Implementation:**
+
+```typescript
+// tests/helpers/test-executor.ts
+import { graphql } from 'graphql';
+import { schema } from '../../src/schema';
+import { MockLlmClient } from '../../src/adapters/mock-llm-client';
+import { TranslationService } from '../../src/domain/translation-service';
+
+export async function executeQuery(query: string, variables?: Record<string, unknown>) {
+  const mockLlm = new MockLlmClient();
+  const translationService = new TranslationService(mockLlm);
+
+  return graphql({
+    schema,
+    source: query,
+    contextValue: { translationService },
+    variableValues: variables,
+  });
+}
+```
+
+**Test example:**
+
+```typescript
+// tests/acceptance/translate-sutra.test.ts
+import { executeQuery } from '../helpers/test-executor';
+
+describe('translateSutra', () => {
+  it('returns word-by-word breakdown', async () => {
+    const result = await executeQuery(`
+      query {
+        translateSutra(sutra: "atha yogānuśāsanam") {
+          originalText
+          words { word grammaticalForm meanings }
+        }
+      }
+    `);
+
+    expect(result.errors).toBeUndefined();
+    expect(result.data?.translateSutra.words).toHaveLength(2);
+  });
+});
+```
+
+**Note:** Integration tests that verify the deployed service still use HTTP requests against the actual running server.
 
 ## Architecture for Testability
 
