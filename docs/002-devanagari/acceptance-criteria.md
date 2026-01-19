@@ -32,18 +32,75 @@ And meanings for each component should be provided
 - Input: `योगश्चित्तवृत्तिनिरोधः`
 - Expected: Same translation result as `yogaś citta-vṛtti-nirodhaḥ`
 
-### Scenario: Handle Devanagari with avagraha and other marks
+---
+
+## Feature: Devanagari Special Character Handling
+
+As a Sanskrit student,
+I want special Devanagari characters to be correctly converted,
+So that the translation accurately reflects the original text.
+
+### Scenario: Handle avagraha (elision marker)
 
 ```gherkin
-Given I have a Sanskrit sutra in Devanagari with special marks
+Given I have a Sanskrit sutra containing avagraha (ऽ)
 When I submit the sutra for translation
-Then avagraha (ऽ) and other diacritical marks should be handled correctly
-And the translation should match the equivalent IAST input
+Then the avagraha should be converted to apostrophe in IAST
+And the translation should be accurate
 ```
 
 **Example:**
 - Input: `तदा द्रष्टुः स्वरूपेऽवस्थानम्`
-- Expected: Same translation result as `tadā draṣṭuḥ svarūpe 'vasthānam`
+- Converts to: `tadā draṣṭuḥ svarūpe'vasthānam`
+
+### Scenario: Handle anusvara (nasal mark)
+
+```gherkin
+Given I have a Sanskrit sutra containing anusvara (ं)
+When I submit the sutra for translation
+Then the anusvara should be converted to ṃ in IAST
+And the translation should be accurate
+```
+
+**Example:**
+- Input: `संयोग`
+- Converts to: `saṃyoga`
+
+### Scenario: Handle visarga (aspiration mark)
+
+```gherkin
+Given I have a Sanskrit sutra containing visarga (ः)
+When I submit the sutra for translation
+Then the visarga should be converted to ḥ in IAST
+And the translation should be accurate
+```
+
+**Example:**
+- Input: `द्रष्टुः`
+- Converts to: `draṣṭuḥ`
+
+### Scenario: Handle consonant conjuncts
+
+```gherkin
+Given I have a Sanskrit sutra containing consonant conjuncts
+When I submit the sutra for translation
+Then conjuncts should be correctly decomposed to their component consonants
+And the translation should be accurate
+```
+
+**Examples:**
+- Input: `वृत्ति` (vṛ conjunct) → Converts to: `vṛtti`
+- Input: `द्र` (dr conjunct) → Converts to: `dra`
+- Input: `क्ष` (kṣ conjunct) → Converts to: `kṣa`
+
+### Scenario: Handle chandrabindu (nasalization)
+
+```gherkin
+Given I have a Sanskrit sutra containing chandrabindu (ँ)
+When I submit the sutra for translation
+Then the chandrabindu should be converted appropriately in IAST
+And the translation should be accurate
+```
 
 ---
 
@@ -78,6 +135,15 @@ Given I submit text containing both Devanagari and Latin characters
 When the translator processes my input
 Then it should return an error indicating mixed scripts are not supported
 And suggest submitting in a single script format
+```
+
+### Scenario: Handle neutral characters in input
+
+```gherkin
+Given I submit text containing spaces, numerals, or punctuation
+When the translator detects the script type
+Then these neutral characters should not affect script detection
+And the script should be determined by the actual script characters present
 ```
 
 ---
