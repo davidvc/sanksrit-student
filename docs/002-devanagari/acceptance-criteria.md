@@ -1,0 +1,120 @@
+# Acceptance Criteria: Devanagari Script Input Support
+
+## Feature: Accept Devanagari Script Input
+
+As a Sanskrit student,
+I want to submit Sanskrit sutras in Devanagari script,
+So that I can use source texts in their original script without manual transliteration.
+
+### Scenario: Translate a sutra provided in Devanagari script
+
+```gherkin
+Given I have a Sanskrit sutra in Devanagari script
+When I submit the sutra for translation
+Then I should receive the same word-by-word breakdown as IAST input
+And each word should have one or more meanings provided
+```
+
+**Example:**
+- Input: `अथ योगानुशासनम्`
+- Expected: Same translation result as `atha yogānuśāsanam`
+
+### Scenario: Handle Devanagari compound words and sandhi
+
+```gherkin
+Given I have a Sanskrit sutra in Devanagari containing compound words
+When I submit the sutra for translation
+Then compound words should be broken down into their component parts
+And meanings for each component should be provided
+```
+
+**Example:**
+- Input: `योगश्चित्तवृत्तिनिरोधः`
+- Expected: Same translation result as `yogaś citta-vṛtti-nirodhaḥ`
+
+### Scenario: Handle Devanagari with avagraha and other marks
+
+```gherkin
+Given I have a Sanskrit sutra in Devanagari with special marks
+When I submit the sutra for translation
+Then avagraha (ऽ) and other diacritical marks should be handled correctly
+And the translation should match the equivalent IAST input
+```
+
+**Example:**
+- Input: `तदा द्रष्टुः स्वरूपेऽवस्थानम्`
+- Expected: Same translation result as `tadā draṣṭuḥ svarūpe 'vasthānam`
+
+---
+
+## Feature: Mixed Input Format Detection
+
+As a Sanskrit student,
+I want the translator to automatically detect whether my input is in Devanagari or IAST,
+So that I don't need to specify the input format manually.
+
+### Scenario: Auto-detect Devanagari input
+
+```gherkin
+Given I submit text containing Devanagari characters
+When the translator processes my input
+Then it should automatically recognize the input as Devanagari
+And process it accordingly without additional configuration
+```
+
+### Scenario: Auto-detect IAST input
+
+```gherkin
+Given I submit text containing only Latin characters with diacritics
+When the translator processes my input
+Then it should automatically recognize the input as IAST
+And continue to process it as before
+```
+
+### Scenario: Reject mixed script input
+
+```gherkin
+Given I submit text containing both Devanagari and Latin characters
+When the translator processes my input
+Then it should return an error indicating mixed scripts are not supported
+And suggest submitting in a single script format
+```
+
+---
+
+## Input/Output Specifications
+
+### Input Formats
+
+1. **Devanagari Script**
+   - Unicode Devanagari block (U+0900 to U+097F)
+   - Examples: `अथ योगानुशासनम्`, `योगश्चित्तवृत्तिनिरोधः`
+   - Supports: vowel marks, consonant conjuncts, anusvara (ं), visarga (ः), avagraha (ऽ), chandrabindu (ँ)
+
+2. **IAST Transliteration** (existing support)
+   - Latin characters with diacritics
+   - Examples: `atha yogānuśāsanam`, `yogaś citta-vṛtti-nirodhaḥ`
+
+### Output Format
+- Output remains unchanged (IAST transliteration with English meanings)
+- The `originalText` field should preserve the input script as provided by the user
+
+### CLI Usage
+```bash
+# Devanagari input
+./translate "अथ योगानुशासनम्"
+
+# IAST input (existing)
+./translate "atha yogānuśāsanam"
+```
+
+### GraphQL Usage
+```graphql
+# Devanagari input
+query {
+  translateSutra(sutra: "अथ योगानुशासनम्") {
+    originalText
+    words { word meanings }
+  }
+}
+```
