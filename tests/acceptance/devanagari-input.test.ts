@@ -36,7 +36,7 @@ describe('Feature: Accept Devanagari Script Input', () => {
       // Devanagari input: अथ योगानुशासनम्
       const devanagariSutra = 'अथ योगानुशासनम्';
       // IAST equivalent (what the mock expects after normalization)
-      const iastSutra = 'atha yoganuasanam';
+      const iastSutra = 'atha yoganusasanam';
 
       // Get result from Devanagari input
       const devanagariResponse = await server.executeQuery<TranslateSutraResponse>({
@@ -250,7 +250,7 @@ describe('Feature: Mixed Input Format Detection', () => {
      * Then it should continue to process it as before (existing behavior)
      */
     it('should continue to work with IAST input', async () => {
-      const iastSutra = 'atha yoganuasanam';
+      const iastSutra = 'atha yoganusasanam';
 
       const response = await server.executeQuery<TranslateSutraResponse>({
         query: TRANSLATE_SUTRA_QUERY,
@@ -310,7 +310,7 @@ describe('Feature: Mixed Input Format Detection', () => {
 
     it('should ignore punctuation in IAST detection', async () => {
       // IAST with punctuation
-      const iastWithPunctuation = 'atha, yoganuasanam!';
+      const iastWithPunctuation = 'atha, yoganusasanam!';
 
       const response = await server.executeQuery<TranslateSutraResponse>({
         query: TRANSLATE_SUTRA_QUERY,

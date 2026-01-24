@@ -26,7 +26,7 @@ describe('Feature: Sanskrit Sutra Word-by-Word Translation', () => {
      * When I submit the sutra for translation
      */
     it('should accept a sutra and return a translation result', async () => {
-      const sutra = 'atha yoganuasanam';
+      const sutra = 'atha yoganusasanam';
 
       const response = await server.executeQuery<TranslateSutraResponse>({
         query: TRANSLATE_SUTRA_QUERY,
@@ -44,7 +44,7 @@ describe('Feature: Sanskrit Sutra Word-by-Word Translation', () => {
      * Then I should see each word from the sutra listed separately
      */
     it('should see each word from the sutra listed separately', async () => {
-      const sutra = 'atha yoganuasanam';
+      const sutra = 'atha yoganusasanam';
 
       const response = await server.executeQuery<TranslateSutraResponse>({
         query: TRANSLATE_SUTRA_QUERY,
@@ -63,7 +63,7 @@ describe('Feature: Sanskrit Sutra Word-by-Word Translation', () => {
      * And each word should have one or more meanings provided
      */
     it('should have one or more meanings provided for each word', async () => {
-      const sutra = 'atha yoganuasanam';
+      const sutra = 'atha yoganusasanam';
 
       const response = await server.executeQuery<TranslateSutraResponse>({
         query: TRANSLATE_SUTRA_QUERY,

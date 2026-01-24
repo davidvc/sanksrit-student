@@ -6,13 +6,13 @@ import { WordEntry } from '../domain/types';
  * Used for testing without external LLM dependencies.
  */
 const STUBBED_RESPONSES: Record<string, WordEntry[]> = {
-  'atha yoganuasanam': [
+  'atha yoganusasanam': [
     {
       word: 'atha',
       meanings: ['now', 'here begins', 'auspicious beginning'],
     },
     {
-      word: 'yoganuasanam',
+      word: 'yogānuśāsanam',
       meanings: [
         'instruction on yoga',
         'teaching of yoga',
@@ -57,13 +57,25 @@ export class MockLlmClient implements LlmClient {
 
   /**
    * Normalizes sutra text for lookup in stubbed responses.
-   * Converts special characters to ASCII equivalents for matching.
+   * Converts IAST diacritics to ASCII equivalents for matching.
    */
   private normalizeSutra(sutra: string): string {
     return sutra
       .toLowerCase()
       .trim()
-      .replace(/a/g, 'a')
-      .replace(/s/g, 's');
+      // Normalize long vowels
+      .replace(/[āá]/g, 'a')
+      .replace(/[īí]/g, 'i')
+      .replace(/[ūú]/g, 'u')
+      .replace(/[ṝṛṟ]/g, 'r')
+      .replace(/[ḹḷḻ]/g, 'l')
+      // Normalize sibilants and nasals
+      .replace(/[śṣ]/g, 's')
+      .replace(/[ñṅṇ]/g, 'n')
+      .replace(/ṃ/g, 'm')
+      .replace(/ḥ/g, 'h')
+      // Normalize retroflex consonants
+      .replace(/ṭ/g, 't')
+      .replace(/ḍ/g, 'd');
   }
 }

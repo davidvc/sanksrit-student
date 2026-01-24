@@ -81,7 +81,7 @@ function isTranslationResult(value: unknown): value is TranslationResult {
 describe('CLI acceptance tests', () => {
   describe('Basic invocation with --mock flag', () => {
     it('should return valid JSON output', () => {
-      const output = runCli('--mock "atha yoganuasanam"');
+      const output = runCli('--mock "atha yoganusasanam"');
 
       // Should parse as valid JSON
       const result = JSON.parse(output.trim());
@@ -100,14 +100,14 @@ describe('CLI acceptance tests', () => {
 
   describe('Output structure validation', () => {
     it('should return JSON matching TranslationResult type', () => {
-      const output = runCli('--mock "atha yoganuasanam"');
+      const output = runCli('--mock "atha yoganusasanam"');
       const result = JSON.parse(output.trim());
 
       // Verify structure matches TranslationResult
       expect(isTranslationResult(result)).toBe(true);
 
       // Verify specific field expectations
-      expect(result.originalText).toBe('atha yoganuasanam');
+      expect(result.originalText).toBe('atha yoganusasanam');
       expect(result.words.length).toBeGreaterThan(0);
 
       // Each word should have required fields

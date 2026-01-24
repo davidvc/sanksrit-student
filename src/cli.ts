@@ -1,6 +1,11 @@
 import { LlmTranslationService } from './adapters/llm-translation-service';
+import { NormalizingTranslationService } from './adapters/normalizing-translation-service';
 import { MockLlmClient } from './adapters/mock-llm-client';
 import { LlmClient } from './domain/llm-client';
+import { ScriptDetectorImpl } from './domain/script-detector';
+import { ScriptNormalizerImpl } from './domain/script-normalizer';
+import { SanscriptConverter } from './adapters/sanscript-converter';
+import { TranslationService } from './domain/translation-service';
 
 /**
  * Parses command-line arguments and returns configuration.
@@ -25,6 +30,18 @@ async function createClient(useMock: boolean): Promise<LlmClient> {
 }
 
 /**
+ * Creates a translation service with Devanagari support.
+ */
+async function createTranslationService(useMock: boolean): Promise<TranslationService> {
+  const client = await createClient(useMock);
+  const baseService = new LlmTranslationService(client);
+  const detector = new ScriptDetectorImpl();
+  const converter = new SanscriptConverter();
+  const normalizer = new ScriptNormalizerImpl(detector, converter);
+  return new NormalizingTranslationService(normalizer, baseService);
+}
+
+/**
  * Main CLI entry point.
  */
 async function main(): Promise<void> {
@@ -37,9 +54,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const client = await createClient(useMock);
-  const service = new LlmTranslationService(client);
-
+  const service = await createTranslationService(useMock);
   const result = await service.translate(sutra);
   console.log(JSON.stringify(result));
   process.exit(0);
