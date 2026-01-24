@@ -21,3 +21,13 @@ export interface TranslationResult {
   /** Word-by-word breakdown with meanings */
   words: WordEntry[];
 }
+
+/**
+ * Error thrown when translation fails due to invalid input or processing errors.
+ */
+export class TranslationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'TranslationError';
+  }
+}
