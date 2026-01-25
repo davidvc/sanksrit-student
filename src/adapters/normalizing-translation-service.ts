@@ -40,10 +40,11 @@ export class NormalizingTranslationService implements TranslationService {
 
     const result = await this.delegate.translate(normalized.iast);
 
-    // Preserve original input text (Devanagari or IAST) in response
+    // Preserve original input text and include IAST transliteration
     return {
       ...result,
       originalText: sutra,
+      iastText: normalized.iast,
     };
   }
 }

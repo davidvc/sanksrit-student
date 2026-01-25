@@ -65,6 +65,7 @@ function isTranslationResult(value: unknown): value is TranslationResult {
   const obj = value as Record<string, unknown>;
   return (
     typeof obj.originalText === 'string' &&
+    typeof obj.iastText === 'string' &&
     Array.isArray(obj.words) &&
     obj.words.every(isWordEntry)
   );

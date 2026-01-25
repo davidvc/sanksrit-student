@@ -11,6 +11,7 @@ export const TRANSLATE_SUTRA_QUERY = `
   query TranslateSutra($sutra: String!) {
     translateSutra(sutra: $sutra) {
       originalText
+      iastText
       words {
         word
         meanings
