@@ -18,6 +18,9 @@ export interface TranslationResult {
   /** The original sutra text that was submitted */
   originalText: string;
 
+  /** The sutra text in IAST transliteration */
+  iastText: string;
+
   /** Word-by-word breakdown with meanings */
   words: WordEntry[];
 }

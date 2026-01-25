@@ -68,6 +68,7 @@ export function createServer(config: ServerConfig) {
 
       type TranslationResult {
         originalText: String!
+        iastText: String!
         words: [WordEntry!]!
       }
 

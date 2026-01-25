@@ -31,6 +31,7 @@ export class LlmTranslationService implements TranslationService {
 
     return {
       originalText: sutra,
+      iastText: sutra,
       words: llmResponse.words,
     };
   }
