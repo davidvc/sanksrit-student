@@ -187,4 +187,77 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(result.words[1].meanings).toContain('field of the Kurus');
     });
   });
+
+  /**
+   * AC3: Handle image with both Devanagari and Latin script
+   *
+   * Given: Image containing mixed Devanagari and Latin text
+   * When: User uploads image to OCR translation endpoint
+   * Then:
+   *   - System extracts only the Devanagari portions
+   *   - System ignores or separates Latin text
+   *   - System translates the Devanagari text accurately
+   */
+  describe('AC3: Mixed Devanagari and Latin script', () => {
+    it('should extract only Devanagari text from mixed script image', async () => {
+      // Arrange
+      const mutation = `
+        mutation TranslateSutraFromImage($image: Upload!) {
+          translateSutraFromImage(image: $image) {
+            extractedText
+            iastText
+            words {
+              word
+              meanings
+            }
+            alternativeTranslations
+            ocrConfidence
+            ocrWarnings
+          }
+        }
+      `;
+
+      // Create mock file with mixed Devanagari and Latin text
+      // OCR result contains: "योग Yoga सूत्र Sutra"
+      // Expected extraction: Only "योग सूत्र" (filtering out Latin)
+      const imageBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]); // PNG magic bytes
+
+      const imageFile = {
+        filename: 'mixed-script-yoga-sutra.png',
+        mimetype: 'image/png',
+        encoding: '7bit',
+        _buffer: imageBuffer,
+      };
+
+      // Act
+      const response = await server.executeQuery<TranslateSutraFromImageResponse>({
+        query: mutation,
+        variables: { image: imageFile },
+      });
+
+      // Assert
+      expect(response.errors).toBeUndefined();
+      expect(response.data).toBeDefined();
+
+      const result = response.data!.translateSutraFromImage;
+
+      // OCR extraction - should filter out Latin text
+      expect(result.extractedText).toBe('योग सूत्र');
+      expect(result.extractedText).not.toContain('Yoga');
+      expect(result.extractedText).not.toContain('Sutra');
+      expect(result.ocrConfidence).toBeGreaterThanOrEqual(0.85);
+
+      // IAST transliteration - only for Devanagari portion
+      expect(result.iastText).toBe('yoga sūtra');
+
+      // Word-by-word breakdown - only Devanagari words
+      expect(result.words).toHaveLength(2);
+
+      expect(result.words[0].word).toBe('yoga');
+      expect(result.words[0].meanings).toContain('union');
+
+      expect(result.words[1].word).toBe('sūtra');
+      expect(result.words[1].meanings).toContain('thread');
+    });
+  });
 });
