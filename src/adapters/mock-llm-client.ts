@@ -56,6 +56,23 @@ const STUBBED_RESPONSES: Record<string, StubbedTranslation> = {
       'Only truth conquers',
     ],
   },
+  'dharmaksetre kuruksetre': {
+    words: [
+      {
+        word: 'dharmakṣetre',
+        meanings: ['field of dharma', 'field of righteousness', 'sacred field'],
+      },
+      {
+        word: 'kurukṣetre',
+        meanings: ['field of the Kurus', 'land of Kuru', 'Kurukshetra'],
+      },
+    ],
+    alternativeTranslations: [
+      'On the field of dharma, on the field of the Kurus',
+      'In the sacred field of Kurukshetra',
+      'On the field of righteousness, the land of Kuru',
+    ],
+  },
 };
 
 /**
