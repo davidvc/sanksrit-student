@@ -24,7 +24,8 @@ export class InMemoryImageStorage implements ImageStorageStrategy {
 
     // For testing: allow direct buffer
     if (upload._buffer) {
-      buffer = upload._buffer;
+      // Ensure it's a proper Buffer (GraphQL Yoga might transform it to a plain object)
+      buffer = Buffer.isBuffer(upload._buffer) ? upload._buffer : Buffer.from(upload._buffer);
     } else if (upload.createReadStream) {
       const chunks: Buffer[] = [];
       const stream = upload.createReadStream();

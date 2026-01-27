@@ -41,6 +41,12 @@ export class OcrTranslationService {
       // Step 2: Store uploaded image
       handle = await this.imageStorage.store(upload);
 
+      // Step 2.1: Validate image size (max 10MB)
+      const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+      if (handle.size > maxSizeBytes) {
+        throw new Error(`Image file too large: ${handle.size} bytes. Maximum allowed: 10MB`);
+      }
+
       // Step 3: Retrieve image buffer
       const buffer = await this.imageStorage.retrieve(handle);
 

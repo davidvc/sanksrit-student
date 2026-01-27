@@ -474,7 +474,8 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       `;
 
       // Create mock file larger than 10MB
-      const oversizedBuffer = Buffer.alloc(11 * 1024 * 1024); // 11MB
+      // Using 10.5MB to test validation without excessive memory allocation
+      const oversizedBuffer = Buffer.alloc(10.5 * 1024 * 1024); // 10.5MB > 10MB limit
 
       const oversizedFile = {
         filename: 'huge-image.png',
