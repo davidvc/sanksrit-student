@@ -47,6 +47,13 @@ export class MockOcrEngine implements OcrEngine {
       confidence: 0.91,
       language: 'sa',
     });
+
+    // AC6: Poor quality image with noise (low confidence)
+    this.filenameResponses.set('low-quality-noisy-om.png', {
+      text: 'ॐ',
+      confidence: 0.62,
+      language: 'sa',
+    });
   }
 
   /**

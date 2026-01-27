@@ -90,6 +90,19 @@ const STUBBED_RESPONSES: Record<string, StubbedTranslation> = {
       'Aphorisms on Practice',
     ],
   },
+  om: {
+    words: [
+      {
+        word: 'oṃ',
+        meanings: ['sacred syllable', 'primordial sound', 'universal sound'],
+      },
+    ],
+    alternativeTranslations: [
+      'Om - the sacred syllable',
+      'The primordial sound',
+      'The universal vibration',
+    ],
+  },
 };
 
 /**
