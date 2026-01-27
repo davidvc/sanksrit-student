@@ -500,4 +500,58 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(response.data).toBeNull();
     });
   });
+
+  /**
+   * AC10: Handle corrupted or invalid image file
+   *
+   * Given: Corrupted image file
+   * When: User uploads file to OCR translation endpoint
+   * Then:
+   *   - System returns error "Invalid or corrupted image file"
+   *   - System provides HTTP status 400 (Bad Request)
+   */
+  describe('AC10: Corrupted image error', () => {
+    it('should return error for corrupted image file', async () => {
+      // Arrange
+      const mutation = `
+        mutation TranslateSutraFromImage($image: Upload!) {
+          translateSutraFromImage(image: $image) {
+            extractedText
+            iastText
+            words {
+              word
+              meanings
+            }
+            alternativeTranslations
+            ocrConfidence
+            ocrWarnings
+          }
+        }
+      `;
+
+      // Create corrupted file (invalid PNG - missing magic bytes)
+      const corruptedBuffer = Buffer.from('NOT A VALID IMAGE FILE');
+
+      const corruptedFile = {
+        filename: 'corrupted.png',
+        mimetype: 'image/png',
+        encoding: '7bit',
+        _buffer: corruptedBuffer,
+      };
+
+      // Act
+      const response = await server.executeQuery<TranslateSutraFromImageResponse>({
+        query: mutation,
+        variables: { image: corruptedFile },
+      });
+
+      // Assert - should have GraphQL error
+      expect(response.errors).toBeDefined();
+      expect(response.errors).toHaveLength(1);
+      expect(response.errors![0].message).toMatch(/invalid|corrupted/i);
+
+      // No data should be returned
+      expect(response.data).toBeNull();
+    });
+  });
 });
