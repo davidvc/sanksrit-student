@@ -112,6 +112,15 @@ Do NOT create all beads upfront - create them just-in-time.
 Acceptance criteria are documented in your feature file (e.g.,
 docs/features/my-feature.feature). Reference that file to see what's next.
 
+BEFORE STARTING FIRST CRITERION:
+---------------------------------
+CRITICAL: Mark THIS task (the parent TDD implementation task) as in_progress:
+
+   bd update [this-molecule-id] --status in_progress
+
+This task should remain in_progress throughout ALL acceptance criteria cycles.
+Only close it when ALL criteria are complete.
+
 WORKFLOW FOR EACH ACCEPTANCE CRITERION:
 ----------------------------------------
 
@@ -124,7 +133,7 @@ WORKFLOW FOR EACH ACCEPTANCE CRITERION:
 3. Create bead for this criterion:
    bd create "TDD: AC[N] - [criterion description]" --parent [this-molecule-id]
 
-4. Update bead to in_progress:
+4. Start work on this criterion:
    bd update [bead-id] --status in_progress
 
 5. RED Phase - Write failing test FIRST:
@@ -147,6 +156,12 @@ WORKFLOW FOR EACH ACCEPTANCE CRITERION:
 
 9. REPEAT: Go back to step 1 for next acceptance criterion
 
+AFTER ALL CRITERIA COMPLETE:
+-----------------------------
+When ALL acceptance criteria have closed beads, close the parent task:
+
+   bd update [this-molecule-id] --status closed
+
 CRITICAL RULES:
 - NEVER write production code without a failing test first
 - Create beads one-at-a-time as you work (just-in-time creation)
@@ -155,6 +170,7 @@ CRITICAL RULES:
 - Each bead = one complete RED-GREEN-REFACTOR cycle
 - Feature file is source of truth for what ACs exist
 - Beads provide audit trail of what's been completed
+- Parent task stays in_progress throughout ALL criteria cycles
 
 TRACKING PROGRESS ACROSS SESSIONS:
 -----------------------------------
