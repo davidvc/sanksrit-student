@@ -81,9 +81,6 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       });
 
       // Assert
-      if (response.errors) {
-        console.error('GraphQL Errors:', JSON.stringify(response.errors, null, 2));
-      }
       expect(response.errors).toBeUndefined();
       expect(response.data).toBeDefined();
 
