@@ -617,4 +617,67 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(result.words.length).toBeGreaterThan(4);
     });
   });
+
+  /**
+   * AC12: Handle image with sandhi (word joining)
+   *
+   * Given: Image containing text with sandhi combinations
+   * When: User uploads image to OCR translation endpoint
+   * Then:
+   *   - System extracts combined text correctly
+   *   - System attempts sandhi splitting for translation
+   *   - System provides word-by-word breakdown of split components
+   */
+  describe('AC12: Sandhi handling', () => {
+    it('should handle text with sandhi combinations', async () => {
+      // Arrange
+      const mutation = `
+        mutation TranslateSutraFromImage($image: Upload!) {
+          translateSutraFromImage(image: $image) {
+            extractedText
+            iastText
+            words {
+              word
+              meanings
+            }
+            alternativeTranslations
+            ocrConfidence
+            ocrWarnings
+          }
+        }
+      `;
+
+      // Create mock file with sandhi
+      const imageBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]); // PNG magic bytes
+
+      const sandhiFile = {
+        filename: 'sandhi-example.png',
+        mimetype: 'image/png',
+        encoding: '7bit',
+        _buffer: imageBuffer,
+      };
+
+      // Act
+      const response = await server.executeQuery<TranslateSutraFromImageResponse>({
+        query: mutation,
+        variables: { image: sandhiFile },
+      });
+
+      // Assert
+      expect(response.errors).toBeUndefined();
+      expect(response.data).toBeDefined();
+
+      const result = response.data!.translateSutraFromImage;
+
+      // Sandhi text extraction
+      expect(result.extractedText).toBe('योगश्चित्तवृत्तिनिरोधः');
+
+      // Translation should handle sandhi (LLM splits it)
+      expect(result.iastText).toBe('yogaścittavṛttinirodhaḥ');
+
+      // Word breakdown shows split components
+      expect(result.words.length).toBeGreaterThan(1);
+      expect(result.words.some((w) => w.word.includes('yoga'))).toBe(true);
+    });
+  });
 });
