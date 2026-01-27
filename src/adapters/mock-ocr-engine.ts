@@ -40,6 +40,13 @@ export class MockOcrEngine implements OcrEngine {
       confidence: 0.89,
       language: 'sa',
     });
+
+    // AC3: Mixed Devanagari and Latin script (Latin already filtered by OCR)
+    this.filenameResponses.set('mixed-script-yoga-sutra.png', {
+      text: 'योग सूत्र',
+      confidence: 0.91,
+      language: 'sa',
+    });
   }
 
   /**

@@ -73,6 +73,23 @@ const STUBBED_RESPONSES: Record<string, StubbedTranslation> = {
       'On the field of righteousness, the land of Kuru',
     ],
   },
+  'yoga sutra': {
+    words: [
+      {
+        word: 'yoga',
+        meanings: ['union', 'yoking', 'practice'],
+      },
+      {
+        word: 'sūtra',
+        meanings: ['thread', 'aphorism', 'concise statement'],
+      },
+    ],
+    alternativeTranslations: [
+      'The Yoga Aphorisms',
+      'Threads on Union',
+      'Aphorisms on Practice',
+    ],
+  },
 };
 
 /**
