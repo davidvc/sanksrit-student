@@ -17,6 +17,51 @@ export class OcrTranslationService {
   ) {}
 
   /**
+   * Validate image buffer by checking magic bytes.
+   * Supports: PNG, JPEG, WEBP, TIFF
+   */
+  private isValidImageBuffer(buffer: Buffer): boolean {
+    if (buffer.length < 4) {
+      return false;
+    }
+
+    // PNG: 89 50 4E 47
+    if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
+      return true;
+    }
+
+    // JPEG: FF D8 FF
+    if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+      return true;
+    }
+
+    // WEBP: 52 49 46 46 ... 57 45 42 50
+    if (
+      buffer.length >= 12 &&
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46 &&
+      buffer[8] === 0x57 &&
+      buffer[9] === 0x45 &&
+      buffer[10] === 0x42 &&
+      buffer[11] === 0x50
+    ) {
+      return true;
+    }
+
+    // TIFF: 49 49 2A 00 (little-endian) or 4D 4D 00 2A (big-endian)
+    if (
+      (buffer[0] === 0x49 && buffer[1] === 0x49 && buffer[2] === 0x2a && buffer[3] === 0x00) ||
+      (buffer[0] === 0x4d && buffer[1] === 0x4d && buffer[2] === 0x00 && buffer[3] === 0x2a)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Translate text from an uploaded image.
    *
    * @param upload - Image file upload
@@ -49,6 +94,11 @@ export class OcrTranslationService {
 
       // Step 3: Retrieve image buffer
       const buffer = await this.imageStorage.retrieve(handle);
+
+      // Step 3.1: Validate image file (basic magic byte check)
+      if (!this.isValidImageBuffer(buffer)) {
+        throw new Error('Invalid or corrupted image file');
+      }
 
       // Step 4: Set filename context for MockOcrEngine (testing only)
       if (this.ocrEngine instanceof MockOcrEngine) {
