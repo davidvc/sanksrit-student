@@ -554,4 +554,67 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(response.data).toBeNull();
     });
   });
+
+  /**
+   * AC11: Extract text from image with multiple lines
+   *
+   * Given: Image containing multiple lines of Devanagari text
+   * When: User uploads image to OCR translation endpoint
+   * Then:
+   *   - System extracts text preserving line breaks
+   *   - System translates the complete multi-line text
+   *   - Original text structure maintained in output
+   */
+  describe('AC11: Multi-line text extraction', () => {
+    it('should extract and translate multi-line Devanagari text', async () => {
+      // Arrange
+      const mutation = `
+        mutation TranslateSutraFromImage($image: Upload!) {
+          translateSutraFromImage(image: $image) {
+            extractedText
+            iastText
+            words {
+              word
+              meanings
+            }
+            alternativeTranslations
+            ocrConfidence
+            ocrWarnings
+          }
+        }
+      `;
+
+      // Create mock file with multi-line text
+      const imageBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]); // PNG magic bytes
+
+      const multiLineFile = {
+        filename: 'multiline-sloka.png',
+        mimetype: 'image/png',
+        encoding: '7bit',
+        _buffer: imageBuffer,
+      };
+
+      // Act
+      const response = await server.executeQuery<TranslateSutraFromImageResponse>({
+        query: mutation,
+        variables: { image: multiLineFile },
+      });
+
+      // Assert
+      expect(response.errors).toBeUndefined();
+      expect(response.data).toBeDefined();
+
+      const result = response.data!.translateSutraFromImage;
+
+      // Multi-line text extraction
+      expect(result.extractedText).toContain('\n');
+      expect(result.extractedText).toBe('असतो मा सद्गमय\nतमसो मा ज्योतिर्गमय');
+
+      // Translation should handle multi-line text
+      expect(result.iastText).toBe('asato mā sadgamaya\ntamaso mā jyotirgamaya');
+
+      // Word count across all lines
+      expect(result.words.length).toBeGreaterThan(4);
+    });
+  });
 });
