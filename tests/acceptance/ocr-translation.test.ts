@@ -387,4 +387,60 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(response.data).toBeNull();
     });
   });
+
+  /**
+   * AC8: Handle unsupported image format
+   *
+   * Given: File in unsupported format (e.g., .txt, .doc)
+   * When: User uploads file to OCR translation endpoint
+   * Then:
+   *   - System returns error "Unsupported image format"
+   *   - System lists supported formats (PNG, JPG, JPEG, WEBP, TIFF)
+   *   - System provides HTTP status 400 (Bad Request)
+   */
+  describe('AC8: Unsupported format error', () => {
+    it('should return error for unsupported file format', async () => {
+      // Arrange
+      const mutation = `
+        mutation TranslateSutraFromImage($image: Upload!) {
+          translateSutraFromImage(image: $image) {
+            extractedText
+            iastText
+            words {
+              word
+              meanings
+            }
+            alternativeTranslations
+            ocrConfidence
+            ocrWarnings
+          }
+        }
+      `;
+
+      // Create mock file with unsupported format
+      const textBuffer = Buffer.from('This is a text file, not an image');
+
+      const textFile = {
+        filename: 'document.txt',
+        mimetype: 'text/plain',
+        encoding: '7bit',
+        _buffer: textBuffer,
+      };
+
+      // Act
+      const response = await server.executeQuery<TranslateSutraFromImageResponse>({
+        query: mutation,
+        variables: { image: textFile },
+      });
+
+      // Assert - should have GraphQL error
+      expect(response.errors).toBeDefined();
+      expect(response.errors).toHaveLength(1);
+      expect(response.errors![0].message).toContain('Unsupported image format');
+      expect(response.errors![0].message).toMatch(/PNG|JPG|JPEG/i);
+
+      // No data should be returned
+      expect(response.data).toBeNull();
+    });
+  });
 });
