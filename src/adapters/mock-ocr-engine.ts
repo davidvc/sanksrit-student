@@ -54,6 +54,13 @@ export class MockOcrEngine implements OcrEngine {
       confidence: 0.62,
       language: 'sa',
     });
+
+    // AC7: No Devanagari text (very low confidence, triggers error)
+    this.filenameResponses.set('no-devanagari-english-only.png', {
+      text: '',
+      confidence: 0.05,
+      language: 'en',
+    });
   }
 
   /**
