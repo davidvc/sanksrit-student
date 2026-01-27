@@ -112,4 +112,79 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(result.alternativeTranslations![0]).toContain('Truth alone');
     });
   });
+
+  /**
+   * AC2: Extract and translate from image with Devanagari manuscript style
+   *
+   * Given: Image containing manuscript-style Devanagari text with ligatures/conjuncts
+   * When: User uploads image to OCR translation endpoint
+   * Then:
+   *   - System extracts Devanagari text correctly
+   *   - System handles ligatures (e.g., क्त, त्र, ज्ञ) correctly
+   *   - System handles conjunct characters correctly
+   *   - System provides accurate IAST transliteration
+   *   - System provides word-by-word translation
+   */
+  describe('AC2: Manuscript-style Devanagari text', () => {
+    it('should extract and translate manuscript-style Devanagari with ligatures', async () => {
+      // Arrange
+      const mutation = `
+        mutation TranslateSutraFromImage($image: Upload!) {
+          translateSutraFromImage(image: $image) {
+            extractedText
+            iastText
+            words {
+              word
+              meanings
+            }
+            alternativeTranslations
+            ocrConfidence
+            ocrWarnings
+          }
+        }
+      `;
+
+      // Create mock file with manuscript-style text containing ligatures
+      // Sanskrit phrase: "धर्मक्षेत्रे कुरुक्षेत्रे" (dharma-kṣetre kuru-kṣetre)
+      // Contains ligatures: क्ष (kṣ), त्र (tr)
+      const imageBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47]); // PNG magic bytes
+
+      const imageFile = {
+        filename: 'manuscript-dharmakshetra.png',
+        mimetype: 'image/png',
+        encoding: '7bit',
+        _buffer: imageBuffer,
+      };
+
+      // Act
+      const response = await server.executeQuery<TranslateSutraFromImageResponse>({
+        query: mutation,
+        variables: { image: imageFile },
+      });
+
+      // Assert
+      expect(response.errors).toBeUndefined();
+      expect(response.data).toBeDefined();
+
+      const result = response.data!.translateSutraFromImage;
+
+      // OCR extraction verification - should correctly extract ligatures
+      expect(result.extractedText).toBe('धर्मक्षेत्रे कुरुक्षेत्रे');
+      expect(result.ocrConfidence).toBeGreaterThanOrEqual(0.85); // Slightly lower for manuscript
+
+      // IAST transliteration - should correctly render ligatures
+      expect(result.iastText).toBe('dharmakṣetre kurukṣetre');
+
+      // Word-by-word breakdown verification
+      expect(result.words).toHaveLength(2);
+
+      // First word: धर्मक्षेत्रे (dharmakṣetre) - contains क्ष ligature
+      expect(result.words[0].word).toBe('dharmakṣetre');
+      expect(result.words[0].meanings).toContain('field of dharma');
+
+      // Second word: कुरुक्षेत्रे (kurukṣetre) - contains क्ष ligature
+      expect(result.words[1].word).toBe('kurukṣetre');
+      expect(result.words[1].meanings).toContain('field of the Kurus');
+    });
+  });
 });
