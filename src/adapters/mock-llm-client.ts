@@ -132,6 +132,31 @@ const STUBBED_RESPONSES: Record<string, StubbedTranslation> = {
       'Guide me from falsehood to truth, from ignorance to illumination',
     ],
   },
+  'yogascittavrttinirodhah': {
+    words: [
+      {
+        word: 'yogaḥ',
+        meanings: ['yoga is', 'union is'],
+      },
+      {
+        word: 'citta',
+        meanings: ['mind', 'consciousness'],
+      },
+      {
+        word: 'vṛtti',
+        meanings: ['fluctuations', 'modifications', 'patterns'],
+      },
+      {
+        word: 'nirodhaḥ',
+        meanings: ['cessation', 'restraint', 'control'],
+      },
+    ],
+    alternativeTranslations: [
+      'Yoga is the cessation of the fluctuations of the mind',
+      'Yoga is the restraint of mental modifications',
+      'Union is the control of consciousness patterns',
+    ],
+  },
 };
 
 /**

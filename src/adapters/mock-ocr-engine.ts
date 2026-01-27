@@ -68,6 +68,13 @@ export class MockOcrEngine implements OcrEngine {
       confidence: 0.93,
       language: 'sa',
     });
+
+    // AC12: Sandhi (word joining) - Yoga Sutra 1.2
+    this.filenameResponses.set('sandhi-example.png', {
+      text: 'योगश्चित्तवृत्तिनिरोधः',
+      confidence: 0.94,
+      language: 'sa',
+    });
   }
 
   /**
