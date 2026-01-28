@@ -3,3 +3,7 @@ dist/
 *.log
 .env
 .env.local
+
+# AI-pack monitoring checkpoints
+.claude/.coordination-checkpoint
+.claude/.watchdog-checkpoint
