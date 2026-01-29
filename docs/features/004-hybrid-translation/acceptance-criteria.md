@@ -101,6 +101,38 @@ And the LLM should still provide contextual analysis
 And the user should be informed which dictionaries were consulted
 ```
 
+### Scenario: Handle invalid dictionary responses
+
+```gherkin
+Given the dictionary API returns a response with missing required fields
+When the system processes the dictionary response
+Then the system should skip invalid dictionary entries
+And the system should still return valid dictionary entries if any exist
+And the LLM translation should still be provided
+```
+
+### Scenario: Handle malformed dictionary data
+
+```gherkin
+Given the dictionary API returns a response with empty or malformed definitions
+When the system validates the dictionary data
+Then empty definitions should be filtered out
+And malformed entries should be skipped
+And the user should see only valid dictionary definitions
+And if no valid definitions exist, only LLM translation should be shown
+```
+
+### Scenario: Handle partial dictionary success
+
+```gherkin
+Given a sutra with multiple words where some dictionary lookups succeed and others fail
+When the system retrieves dictionary data
+Then words with successful lookups should display dictionary definitions
+And words with failed lookups should display only LLM translations
+And no warnings should be shown if LLM data is available for all words
+And the response should indicate which words have dictionary coverage
+```
+
 ---
 
 ## Feature: LLM-Enhanced Contextual Explanation
@@ -400,3 +432,7 @@ When services are unavailable, the response should include a `warnings` field:
 - [ ] Word-by-word breakdown integrates both dictionary and LLM data
 - [ ] Full contextual translation is provided by LLM (alternativeTranslations)
 - [ ] System handles words not found in dictionary gracefully
+- [ ] System handles invalid dictionary responses (missing required fields)
+- [ ] System filters out malformed dictionary data (empty definitions)
+- [ ] System handles partial dictionary success (some words found, others not)
+- [ ] Valid dictionary entries are shown even when some entries are invalid
