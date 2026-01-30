@@ -1,6 +1,7 @@
 import { ScriptNormalizer } from '../domain/script-normalizer';
 import { TranslationService } from '../domain/translation-service';
 import { TranslationResult, TranslationError } from '../domain/types';
+import { normalizeToLines } from '../domain/text-normalizer';
 
 /**
  * Decorator that adds script normalization to a TranslationService.
@@ -41,8 +42,8 @@ export class NormalizingTranslationService implements TranslationService {
     const result = await this.delegate.translate(normalized.iast);
 
     // Split multiline input into arrays (always return array, even for single line)
-    const originalText = sutra.split('\n').filter(line => line.trim().length > 0);
-    const iastText = normalized.iast.split('\n').filter(line => line.trim().length > 0);
+    const originalText = normalizeToLines(sutra);
+    const iastText = normalizeToLines(normalized.iast);
 
     // Preserve original input text and include IAST transliteration
     return {

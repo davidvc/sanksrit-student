@@ -2,6 +2,7 @@ import { TranslationService } from '../domain/translation-service';
 import { TranslationResult } from '../domain/types';
 import { LlmClient } from '../domain/llm-client';
 import { DictionaryClient } from '../domain/dictionary-client';
+import { normalizeToLines } from '../domain/text-normalizer';
 
 /**
  * Hybrid translation service that combines LLM-based translation with
@@ -59,8 +60,8 @@ export class HybridTranslationService implements TranslationService {
     }));
 
     // Step 5: Return enhanced result (split multiline into array)
-    const originalText = sutra.split('\n').filter(line => line.trim().length > 0);
-    const iastText = sutra.split('\n').filter(line => line.trim().length > 0);
+    const originalText = normalizeToLines(sutra);
+    const iastText = normalizeToLines(sutra);
 
     return {
       originalText,

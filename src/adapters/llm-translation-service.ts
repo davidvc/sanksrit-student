@@ -1,6 +1,7 @@
 import { LlmClient } from '../domain/llm-client';
 import { TranslationService } from '../domain/translation-service';
 import { TranslationResult } from '../domain/types';
+import { normalizeToLines } from '../domain/text-normalizer';
 
 /**
  * Implementation of TranslationService that delegates to an LlmClient.
@@ -30,8 +31,8 @@ export class LlmTranslationService implements TranslationService {
     const llmResponse = await this.llmClient.translateSutra(sutra);
 
     // Split multiline input into array (always return array, even for single line)
-    const originalText = sutra.split('\n').filter(line => line.trim().length > 0);
-    const iastText = sutra.split('\n').filter(line => line.trim().length > 0);
+    const originalText = normalizeToLines(sutra);
+    const iastText = normalizeToLines(sutra);
 
     return {
       originalText,
