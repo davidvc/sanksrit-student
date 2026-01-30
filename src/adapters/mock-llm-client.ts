@@ -137,18 +137,53 @@ const STUBBED_RESPONSES: Record<string, StubbedTranslation> = {
       {
         word: 'yogaḥ',
         meanings: ['yoga is', 'union is'],
+        contextualNote: 'The subject of the sentence - refers to the practice/discipline of yoga',
       },
       {
         word: 'citta',
         meanings: ['mind', 'consciousness'],
+        contextualNote: "Combines with the next word (vṛtti) to mean 'fluctuations of the mind'",
       },
       {
         word: 'vṛtti',
         meanings: ['fluctuations', 'modifications', 'patterns'],
+        contextualNote:
+          "Completes the compound word - together with citta means 'mind-fluctuations' or 'mental modifications'",
       },
       {
         word: 'nirodhaḥ',
         meanings: ['cessation', 'restraint', 'control'],
+        contextualNote: "What yoga IS - 'cessation' is more accurate here than 'suppression'",
+      },
+    ],
+    alternativeTranslations: [
+      'Yoga is the cessation of the fluctuations of the mind',
+      'Yoga is the restraint of mental modifications',
+      'Union is the control of consciousness patterns',
+    ],
+  },
+  'yogas cittavrttinirodhah': {
+    words: [
+      {
+        word: 'yogaḥ',
+        meanings: ['yoga is', 'union is'],
+        contextualNote: 'The subject of the sentence - refers to the practice/discipline of yoga',
+      },
+      {
+        word: 'citta',
+        meanings: ['mind', 'consciousness'],
+        contextualNote: "Combines with the next word (vṛtti) to mean 'fluctuations of the mind'",
+      },
+      {
+        word: 'vṛtti',
+        meanings: ['fluctuations', 'modifications', 'patterns'],
+        contextualNote:
+          "Completes the compound word - together with citta means 'mind-fluctuations' or 'mental modifications'",
+      },
+      {
+        word: 'nirodhaḥ',
+        meanings: ['cessation', 'restraint', 'control'],
+        contextualNote: "What yoga IS - 'cessation' is more accurate here than 'suppression'",
       },
     ],
     alternativeTranslations: [
@@ -209,6 +244,8 @@ export class MockLlmClient implements LlmClient {
     return sutra
       .toLowerCase()
       .trim()
+      // Remove hyphens (compound word markers) but preserve spaces
+      .replace(/-/g, '')
       // Normalize long vowels
       .replace(/[āá]/g, 'a')
       .replace(/[īí]/g, 'i')

@@ -1,4 +1,15 @@
 /**
+ * Represents a definition from a Sanskrit dictionary.
+ */
+export interface DictionaryDefinition {
+  /** Name of the dictionary source (e.g., "PWG Dictionary") */
+  source: string;
+
+  /** Definition text from the dictionary */
+  definition: string;
+}
+
+/**
  * Represents a single word from a Sanskrit sutra with its grammatical
  * analysis and meanings.
  */
@@ -6,8 +17,14 @@ export interface WordEntry {
   /** The Sanskrit word in IAST transliteration */
   word: string;
 
-  /** One or more English meanings for this word */
+  /** One or more English meanings for this word (from LLM) */
   meanings: string[];
+
+  /** Optional dictionary definitions from authoritative sources (NEW) */
+  dictionaryDefinitions?: DictionaryDefinition[];
+
+  /** Optional plain-English contextual explanation from LLM (NEW) */
+  contextualNote?: string;
 }
 
 /**
@@ -26,6 +43,9 @@ export interface TranslationResult {
 
   /** Alternative translations of the complete sutra (up to 3) */
   alternativeTranslations?: string[];
+
+  /** Optional warnings when services are degraded (NEW) */
+  warnings?: string[];
 }
 
 /**
