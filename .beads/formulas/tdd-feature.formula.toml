@@ -126,7 +126,7 @@ A. Create bead for this AC:
 
 B. Spawn RED-GREEN subagent using Task tool:
 
-   Task(subagent_type="general-purpose", prompt="""
+   Task(subagent_type="general-purpose", prompt='''
    Execute RED-GREEN phases for acceptance criterion bead [bead-id].
 
    CONTEXT:
@@ -161,13 +161,13 @@ B. Spawn RED-GREEN subagent using Task tool:
    - Each phase = separate git commit
    - Verify test results at each phase
    - DO NOT REFACTOR - that's a separate step
-   """)
+   ''')
 
 C. Wait for RED-GREEN subagent to complete
 
 D. Spawn REFACTOR subagent using Task tool:
 
-   Task(subagent_type="general-purpose", prompt="""
+   Task(subagent_type="general-purpose", prompt='''
    Execute REFACTOR phase for acceptance criterion bead [bead-id].
 
    CONTEXT:
@@ -205,7 +205,7 @@ D. Spawn REFACTOR subagent using Task tool:
    - If refactor breaks test, fix it before closing
    - All coding guidelines must be followed
    - Reference .ai-pack/quality/ for standards
-   """)
+   ''')
 
 E. Wait for REFACTOR subagent to complete
 
