@@ -99,98 +99,139 @@ Once human approves, commit the design documents:
 This preserves the approved design in version control before implementation begins."""
 
 [[steps]]
-id = "tdd"
+id = "tdd-loop"
 title = "TDD implementation of {{feature}}"
 needs = ["design-review"]
-description = """Execute RED-GREEN-REFACTOR TDD loop for each acceptance criterion.
+description = """Execute RED-GREEN-REFACTOR TDD loop for each acceptance criterion SEQUENTIALLY.
 
-APPROACH: One Bead at a Time (Just-in-Time)
---------------------------------------------
-Create a task bead for EACH acceptance criterion as you work on it.
-Do NOT create all beads upfront - create them just-in-time.
+CRITICAL: Each AC runs in its own fresh context (separate subagent).
+Each AC builds on the previous one's changes.
+Do NOT ask for approval - execute all ACs automatically.
 
-Acceptance criteria are documented in your feature file (e.g.,
-docs/features/my-feature.feature). Reference that file to see what's next.
-
-BEFORE STARTING FIRST CRITERION:
----------------------------------
-CRITICAL: Mark THIS task (the parent TDD implementation task) as in_progress:
-
+SETUP:
+------
+1. Mark THIS task (the parent TDD implementation task) as in_progress:
    bd update [this-molecule-id] --status in_progress
 
-This task should remain in_progress throughout ALL acceptance criteria cycles.
-Only close it when ALL criteria are complete.
+2. Read the feature file (e.g., docs/features/{{feature}}.feature) to extract
+   all acceptance criteria scenarios (AC1, AC2, AC3...).
 
-WORKFLOW FOR EACH ACCEPTANCE CRITERION:
-----------------------------------------
+WORKFLOW - FOR EACH ACCEPTANCE CRITERION (SEQUENTIAL):
+-------------------------------------------------------
 
-1. Check progress (what's done?):
-   bd list --parent [this-molecule-id] --status closed
+For each AC in the feature file:
 
-2. Choose next acceptance criterion from feature file
-   (e.g., AC1, AC2, AC3... based on what's not done yet)
-
-3. Create bead for this criterion:
+A. Create bead for this AC:
    bd create "TDD: AC[N] - [criterion description]" --parent [this-molecule-id]
 
-4. Start work on this criterion:
-   bd update [bead-id] --status in_progress
+B. Spawn RED-GREEN subagent using Task tool:
 
-5. RED Phase - Write failing test FIRST:
-   - Write acceptance test for this criterion ONLY
-   - Run test → Verify it FAILS (red)
-   - Commit: "RED: AC[N] - [description]"
+   Task(subagent_type="general-purpose", prompt="""
+   Execute RED-GREEN phases for acceptance criterion bead [bead-id].
 
-6. GREEN Phase - Make it pass:
-   - Write minimal code to pass test
-   - Run test → Verify it PASSES (green)
-   - Commit: "GREEN: AC[N] - [description]"
+   CONTEXT:
+   - Feature: {{feature}}
+   - Acceptance Criterion: AC[N]
+   - Feature file: docs/features/{{feature}}.feature
+   - This is AC [N] of [total] - builds on previous ACs
 
-7. REFACTOR Phase - Clean up:
-   - Improve code quality without changing behavior
-   - Run test → Verify STILL PASSES (green)
-   - Commit: "REFACTOR: AC[N] - [description]"
+   WORKFLOW:
+   1. Start work:
+      bd update [bead-id] --status in_progress
 
-8. Close bead:
-   bd update [bead-id] --status closed
+   2. Read feature file to understand THIS acceptance criterion
 
-9. REPEAT: Go back to step 1 for next acceptance criterion
+   3. RED Phase - Write failing test FIRST:
+      - Write acceptance test for this criterion ONLY
+      - Tests go in acceptance/ directory
+      - Use mocks (e.g., MockOcrEngine) for fast tests
+      - Run test → Verify it FAILS (red)
+      - Commit: "RED: AC[N] - [description]"
+
+   4. GREEN Phase - Make it pass:
+      - Write minimal code to pass test
+      - Run test → Verify it PASSES (green)
+      - Commit: "GREEN: AC[N] - [description]"
+
+   5. DO NOT close bead - leave it in_progress for REFACTOR phase
+
+   CRITICAL RULES:
+   - NEVER write production code without a failing test first
+   - Tests written in acceptance/ directory
+   - Each phase = separate git commit
+   - Verify test results at each phase
+   - DO NOT REFACTOR - that's a separate step
+   """)
+
+C. Wait for RED-GREEN subagent to complete
+
+D. Spawn REFACTOR subagent using Task tool:
+
+   Task(subagent_type="general-purpose", prompt="""
+   Execute REFACTOR phase for acceptance criterion bead [bead-id].
+
+   CONTEXT:
+   - Feature: {{feature}}
+   - Acceptance Criterion: AC[N]
+   - RED and GREEN phases are complete
+   - Test is passing
+
+   WORKFLOW:
+   1. Verify test passes:
+      - Run the acceptance test for AC[N]
+      - Confirm it's GREEN
+
+   2. REFACTOR Phase - Clean up and enforce coding guidelines:
+      - Improve code quality without changing behavior
+      - Follow clean code principles from .ai-pack/quality/clean-code/
+      - Enforce project coding standards and conventions
+      - Check for:
+        * Proper naming conventions
+        * Code duplication (DRY principle)
+        * Function/method length and complexity
+        * Separation of concerns
+        * Type safety and proper typing
+        * Error handling patterns
+        * Code comments where needed (especially for complex logic)
+      - Run test → Verify STILL PASSES (green)
+      - Commit: "REFACTOR: AC[N] - [description]"
+
+   3. Close bead:
+      bd update [bead-id] --status closed
+
+   CRITICAL RULES:
+   - Only refactor, don't change behavior
+   - Test must stay green
+   - If refactor breaks test, fix it before closing
+   - All coding guidelines must be followed
+   - Reference .ai-pack/quality/ for standards
+   """)
+
+E. Wait for REFACTOR subagent to complete
+
+F. REPEAT for next AC (sequential execution)
 
 AFTER ALL CRITERIA COMPLETE:
 -----------------------------
-When ALL acceptance criteria have closed beads, close the parent task:
+When ALL acceptance criteria have closed beads:
 
+1. Run full test suite to verify no regressions
+
+2. Close parent task:
    bd update [this-molecule-id] --status closed
 
-CRITICAL RULES:
-- NEVER write production code without a failing test first
-- Create beads one-at-a-time as you work (just-in-time creation)
-- Tests written in acceptance/ directory, 1-to-1 with criteria
-- Use mocks (e.g., MockOcrEngine) for fast, deterministic tests
-- Each bead = one complete RED-GREEN-REFACTOR cycle
-- Feature file is source of truth for what ACs exist
-- Beads provide audit trail of what's been completed
-- Parent task stays in_progress throughout ALL criteria cycles
-
-TRACKING PROGRESS ACROSS SESSIONS:
------------------------------------
-When resuming work in a new session:
-
-1. Check what's completed:
-   bd list --parent [this-molecule-id] --status closed
-
-2. Reference feature file to see all acceptance criteria
-
-3. Pick next AC that doesn't have a closed bead
-
-4. Create bead and work through RED-GREEN-REFACTOR
-
-Continue until ALL acceptance criteria from feature file have closed beads."""
+KEY REQUIREMENTS:
+-----------------
+- Execute ACs SEQUENTIALLY (AC1, then AC2, then AC3...)
+- Each AC has TWO subagents: RED-GREEN, then REFACTOR
+- Each subagent runs in fresh context
+- No approval between ACs or between RED-GREEN and REFACTOR
+- Each AC builds on code from previous ACs"""
 
 [[steps]]
 id = "submit"
 title = "Submit {{feature}} for merge"
-needs = ["tdd"]
+needs = ["tdd-loop"]
 description = """Final submission after all TDD iterations complete.
 
 Checklist:
