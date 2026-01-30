@@ -58,10 +58,13 @@ export class HybridTranslationService implements TranslationService {
       dictionaryDefinitions: dictResults.get(llmWord.word) || [],
     }));
 
-    // Step 5: Return enhanced result
+    // Step 5: Return enhanced result (split multiline into array)
+    const originalText = sutra.split('\n').filter(line => line.trim().length > 0);
+    const iastText = sutra.split('\n').filter(line => line.trim().length > 0);
+
     return {
-      originalText: sutra,
-      iastText: sutra,
+      originalText,
+      iastText,
       words: enhancedWords,
       alternativeTranslations: llmResponse.alternativeTranslations,
       warnings,

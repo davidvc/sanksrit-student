@@ -121,9 +121,9 @@ describe('Feature: Hybrid Translation - Dictionary + LLM', () => {
       // Should have word-by-word breakdown with dictionary sources
       expect(result.words.length).toBe(4);
 
-      // Original and IAST text should be preserved
-      expect(result.originalText).toBe('yogaś citta-vṛtti-nirodhaḥ');
-      expect(result.iastText).toBe('yogaś citta-vṛtti-nirodhaḥ');
+      // Original and IAST text should be preserved (now returns arrays)
+      expect(result.originalText).toEqual(['yogaś citta-vṛtti-nirodhaḥ']);
+      expect(result.iastText).toEqual(['yogaś citta-vṛtti-nirodhaḥ']);
     });
 
     it('should clearly distinguish dictionary data from LLM data', async () => {

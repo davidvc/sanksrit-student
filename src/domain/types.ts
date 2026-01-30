@@ -32,11 +32,11 @@ export interface WordEntry {
  * including the original text and word-by-word breakdown.
  */
 export interface TranslationResult {
-  /** The original sutra text that was submitted */
-  originalText: string;
+  /** The original sutra text that was submitted (array with one entry per line) */
+  originalText: string[];
 
-  /** The sutra text in IAST transliteration */
-  iastText: string;
+  /** The sutra text in IAST transliteration (array with one entry per line) */
+  iastText: string[];
 
   /** Word-by-word breakdown with meanings */
   words: WordEntry[];

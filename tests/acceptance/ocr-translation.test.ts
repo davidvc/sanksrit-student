@@ -92,8 +92,8 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       // No warnings for high confidence (GraphQL returns null for missing optional fields)
       expect(result.ocrWarnings || undefined).toBeUndefined();
 
-      // Translation verification
-      expect(result.iastText).toBe('satyameva jayate');
+      // Translation verification (now returns array)
+      expect(result.iastText).toEqual(['satyameva jayate']);
 
       // Word-by-word breakdown verification
       expect(result.words).toHaveLength(3);
@@ -172,8 +172,8 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(result.extractedText).toBe('धर्मक्षेत्रे कुरुक्षेत्रे');
       expect(result.ocrConfidence).toBeGreaterThanOrEqual(0.85); // Slightly lower for manuscript
 
-      // IAST transliteration - should correctly render ligatures
-      expect(result.iastText).toBe('dharmakṣetre kurukṣetre');
+      // IAST transliteration - should correctly render ligatures (now returns array)
+      expect(result.iastText).toEqual(['dharmakṣetre kurukṣetre']);
 
       // Word-by-word breakdown verification
       expect(result.words).toHaveLength(2);
@@ -247,8 +247,8 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(result.extractedText).not.toContain('Sutra');
       expect(result.ocrConfidence).toBeGreaterThanOrEqual(0.85);
 
-      // IAST transliteration - only for Devanagari portion
-      expect(result.iastText).toBe('yoga sūtra');
+      // IAST transliteration - only for Devanagari portion (now returns array)
+      expect(result.iastText).toEqual(['yoga sūtra']);
 
       // Word-by-word breakdown - only Devanagari words
       expect(result.words).toHaveLength(2);
@@ -325,8 +325,8 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(result.ocrWarnings).toHaveLength(1);
       expect(result.ocrWarnings![0]).toContain('Low OCR confidence');
 
-      // Translation still provided despite low confidence
-      expect(result.iastText).toBe('oṃ');
+      // Translation still provided despite low confidence (now returns array)
+      expect(result.iastText).toEqual(['oṃ']);
       expect(result.words).toHaveLength(1);
       expect(result.words[0].word).toBe('oṃ');
       expect(result.words[0].meanings).toContain('sacred syllable');
@@ -610,8 +610,8 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       expect(result.extractedText).toContain('\n');
       expect(result.extractedText).toBe('असतो मा सद्गमय\nतमसो मा ज्योतिर्गमय');
 
-      // Translation should handle multi-line text
-      expect(result.iastText).toBe('asato mā sadgamaya\ntamaso mā jyotirgamaya');
+      // Translation should handle multi-line text (now returns array)
+      expect(result.iastText).toEqual(['asato mā sadgamaya', 'tamaso mā jyotirgamaya']);
 
       // Word count across all lines
       expect(result.words.length).toBeGreaterThan(4);
@@ -672,8 +672,8 @@ describe('Feature: Devanagari OCR Image to Translation', () => {
       // Sandhi text extraction
       expect(result.extractedText).toBe('योगश्चित्तवृत्तिनिरोधः');
 
-      // Translation should handle sandhi (LLM splits it)
-      expect(result.iastText).toBe('yogaścittavṛttinirodhaḥ');
+      // Translation should handle sandhi (LLM splits it, now returns array)
+      expect(result.iastText).toEqual(['yogaścittavṛttinirodhaḥ']);
 
       // Word breakdown shows split components
       expect(result.words.length).toBeGreaterThan(1);

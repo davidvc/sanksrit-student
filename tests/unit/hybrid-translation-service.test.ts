@@ -49,8 +49,8 @@ describe('HybridTranslationService', () => {
     it('should set originalText and iastText correctly', async () => {
       const result = await service.translate('yogaś citta-vṛtti-nirodhaḥ');
 
-      expect(result.originalText).toBe('yogaś citta-vṛtti-nirodhaḥ');
-      expect(result.iastText).toBe('yogaś citta-vṛtti-nirodhaḥ');
+      expect(result.originalText).toEqual(['yogaś citta-vṛtti-nirodhaḥ']);
+      expect(result.iastText).toEqual(['yogaś citta-vṛtti-nirodhaḥ']);
     });
 
     it('should not include warnings when both services work', async () => {

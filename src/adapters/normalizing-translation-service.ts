@@ -40,11 +40,15 @@ export class NormalizingTranslationService implements TranslationService {
 
     const result = await this.delegate.translate(normalized.iast);
 
+    // Split multiline input into arrays (always return array, even for single line)
+    const originalText = sutra.split('\n').filter(line => line.trim().length > 0);
+    const iastText = normalized.iast.split('\n').filter(line => line.trim().length > 0);
+
     // Preserve original input text and include IAST transliteration
     return {
       ...result,
-      originalText: sutra,
-      iastText: normalized.iast,
+      originalText,
+      iastText,
     };
   }
 }

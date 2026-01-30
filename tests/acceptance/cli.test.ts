@@ -64,8 +64,10 @@ function isTranslationResult(value: unknown): value is TranslationResult {
   if (typeof value !== 'object' || value === null) return false;
   const obj = value as Record<string, unknown>;
   return (
-    typeof obj.originalText === 'string' &&
-    typeof obj.iastText === 'string' &&
+    Array.isArray(obj.originalText) &&
+    obj.originalText.every((s: unknown) => typeof s === 'string') &&
+    Array.isArray(obj.iastText) &&
+    obj.iastText.every((s: unknown) => typeof s === 'string') &&
     Array.isArray(obj.words) &&
     obj.words.every(isWordEntry)
   );
@@ -107,8 +109,8 @@ describe('CLI acceptance tests', () => {
       // Verify structure matches TranslationResult
       expect(isTranslationResult(result)).toBe(true);
 
-      // Verify specific field expectations
-      expect(result.originalText).toBe('atha yoganusasanam');
+      // Verify specific field expectations (now returns array)
+      expect(result.originalText).toEqual(['atha yoganusasanam']);
       expect(result.words.length).toBeGreaterThan(0);
 
       // Each word should have required fields

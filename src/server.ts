@@ -89,15 +89,15 @@ export function createServer(config: ServerConfig) {
       }
 
       type TranslationResult {
-        originalText: String!
-        iastText: String!
+        originalText: [String!]!
+        iastText: [String!]!
         words: [WordEntry!]!
         alternativeTranslations: [String!]
       }
 
       type OcrTranslationResult {
-        originalText: String!
-        iastText: String!
+        originalText: [String!]!
+        iastText: [String!]!
         words: [WordEntry!]!
         alternativeTranslations: [String!]
         ocrConfidence: Float!

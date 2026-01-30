@@ -37,7 +37,7 @@ describe('Feature: Sanskrit Sutra Word-by-Word Translation', () => {
       expect(response.data?.translateSutra).toBeDefined();
 
       const result = response.data!.translateSutra;
-      expect(result.originalText).toBe(sutra);
+      expect(result.originalText).toEqual([sutra]);
     });
 
     /**

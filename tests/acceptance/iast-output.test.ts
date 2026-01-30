@@ -44,7 +44,7 @@ describe('Feature: Include full sutra in IAST in translation output', () => {
 
       expect(response.errors).toBeUndefined();
       expect(response.data?.translateSutra).toBeDefined();
-      expect(response.data!.translateSutra.iastText).toBe(iastSutra);
+      expect(response.data!.translateSutra.iastText).toEqual([iastSutra]);
     });
 
     /**
@@ -63,7 +63,7 @@ describe('Feature: Include full sutra in IAST in translation output', () => {
 
       expect(response.errors).toBeUndefined();
       expect(response.data?.translateSutra).toBeDefined();
-      expect(response.data!.translateSutra.iastText).toBe(expectedIast);
+      expect(response.data!.translateSutra.iastText).toEqual([expectedIast]);
     });
   });
 
@@ -85,14 +85,14 @@ describe('Feature: Include full sutra in IAST in translation output', () => {
       expect(response.errors).toBeUndefined();
       const result = response.data!.translateSutra;
 
-      // originalText preserves Devanagari input
-      expect(result.originalText).toBe(devanagariSutra);
+      // originalText preserves Devanagari input (now returns array)
+      expect(result.originalText).toEqual([devanagariSutra]);
 
-      // iastText contains IAST (Latin characters with diacritics)
+      // iastText contains IAST (Latin characters with diacritics, now returns array)
       expect(result.iastText).toBeDefined();
-      expect(result.iastText).not.toBe(devanagariSutra);
+      expect(result.iastText).not.toEqual([devanagariSutra]);
       // Verify it contains Latin characters (IAST)
-      expect(result.iastText).toMatch(/^[a-zA-Zāīūṛṝḷḹēōṃḥñṅṇśṣṭḍ\s']+$/);
+      expect(result.iastText[0]).toMatch(/^[a-zA-Zāīūṛṝḷḹēōṃḥñṅṇśṣṭḍ\s']+$/);
     });
   });
 

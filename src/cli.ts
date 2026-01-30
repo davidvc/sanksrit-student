@@ -56,7 +56,7 @@ async function main(): Promise<void> {
 
   const service = await createTranslationService(useMock);
   const result = await service.translate(sutra);
-  console.log(JSON.stringify(result));
+  console.log(JSON.stringify(result, null, 2));
   process.exit(0);
 }
 

@@ -77,8 +77,8 @@ describe('HybridTranslationService - Fallback Scenarios', () => {
         expect(word.contextualNote).toBeDefined();
       });
 
-      expect(result.originalText).toBe('yogaś citta-vṛtti-nirodhaḥ');
-      expect(result.iastText).toBe('yogaś citta-vṛtti-nirodhaḥ');
+      expect(result.originalText).toEqual(['yogaś citta-vṛtti-nirodhaḥ']);
+      expect(result.iastText).toEqual(['yogaś citta-vṛtti-nirodhaḥ']);
     });
   });
 

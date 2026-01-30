@@ -29,9 +29,13 @@ export class LlmTranslationService implements TranslationService {
   async translate(sutra: string): Promise<TranslationResult> {
     const llmResponse = await this.llmClient.translateSutra(sutra);
 
+    // Split multiline input into array (always return array, even for single line)
+    const originalText = sutra.split('\n').filter(line => line.trim().length > 0);
+    const iastText = sutra.split('\n').filter(line => line.trim().length > 0);
+
     return {
-      originalText: sutra,
-      iastText: sutra,
+      originalText,
+      iastText,
       words: llmResponse.words,
       alternativeTranslations: llmResponse.alternativeTranslations,
     };

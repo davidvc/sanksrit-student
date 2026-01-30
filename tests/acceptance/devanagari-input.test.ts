@@ -95,7 +95,7 @@ describe('Feature: Accept Devanagari Script Input', () => {
       expect(response.errors).toBeUndefined();
       const result = response.data!.translateSutra;
 
-      expect(result.originalText).toBe(devanagariSutra);
+      expect(result.originalText).toEqual([devanagariSutra]);
     });
   });
 
