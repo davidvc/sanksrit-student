@@ -60,7 +60,6 @@ bd sync               # Sync with git
   - Keep cyclomatic complexity low
 - Use **Design Patterns** appropriately to reduce coupling and improve maintainability
 - Favor composition over inheritance
-- Program to interfaces, not implementations
 
 ## Testing Standards
 
