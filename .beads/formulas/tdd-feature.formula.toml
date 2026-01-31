@@ -229,14 +229,70 @@ KEY REQUIREMENTS:
 - Each AC builds on code from previous ACs"""
 
 [[steps]]
+id = "code-review"
+title = "Code review for {{feature}}"
+needs = ["tdd-loop"]
+description = """Run comprehensive code review using the code-review formula.
+
+Execute the code-review formula to review the implemented feature:
+
+EXECUTION:
+----------
+Use bt (beads formula tool) to invoke the code-review formula:
+
+  bt code-review --branch {{feature-branch}} --preset gate
+
+This will spawn parallel review agents (convoy pattern) covering:
+- Wiring: Dependencies added but not used
+- Security: Vulnerabilities and security issues
+- Smells: Anti-patterns and technical debt
+- Test Quality: Test meaningfulness verification
+
+The review will generate findings in .reviews/ directory.
+
+REVIEW FINDINGS:
+----------------
+After the code-review formula completes:
+
+1. Read the synthesis report: .reviews/[review-id]/review-summary.md
+
+2. Address Critical Issues (P0):
+   - MUST fix before merge
+   - Create beads for each critical issue
+   - Fix and verify
+
+3. Address Major Issues (P1):
+   - SHOULD fix before merge
+   - Create beads as needed
+   - Fix or document why deferred
+
+4. Document Minor Issues (P2):
+   - Nice to have
+   - Add to technical debt tracking if not addressed
+
+5. Commit review artifacts:
+   git add .reviews/
+   git commit -m "Code review completed for {{feature}}
+
+   - Comprehensive review via code-review formula
+   - Addressed all critical and major issues
+
+   Co-Authored-By: Claude (hubgpt-chat-completions-claude-sonnet-4-5) <noreply@anthropic.com>"
+
+BLOCKING:
+---------
+Do NOT proceed to submit step if there are unresolved P0 (Critical) issues.
+All critical issues must be fixed before the feature can be submitted for merge."""
+
+[[steps]]
 id = "submit"
 title = "Submit {{feature}} for merge"
-needs = ["tdd-loop"]
-description = """Final submission after all TDD iterations complete.
+needs = ["code-review"]
+description = """Final submission after all TDD iterations and code review complete.
 
 Checklist:
 - All acceptance tests pass
-- Code reviewed
+- Code review completed (all P0 issues resolved)
 - No regressions in existing tests
 - Git status clean
 - Ready to push/merge"""
