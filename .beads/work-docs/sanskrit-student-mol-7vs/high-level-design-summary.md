@@ -1,7 +1,7 @@
 # High-Level Design Summary: Devanagari OCR to Translation
 
-**Molecule:** sanksrit-student-mol-7vs
-**Task:** sanksrit-student-mol-m1f
+**Molecule:** sanskrit-student-mol-7vs
+**Task:** sanskrit-student-mol-m1f
 **Created:** 2026-01-27
 **Status:** READY FOR REVIEW
 

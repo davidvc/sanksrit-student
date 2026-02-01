@@ -1,8 +1,8 @@
 # Acceptance Criteria: Devanagari OCR Image to Translation
 
 **Feature:** Devanagari OCR Image to Translation
-**Molecule:** sanksrit-student-mol-7vs
-**Task:** sanksrit-student-mol-f4m
+**Molecule:** sanskrit-student-mol-7vs
+**Task:** sanskrit-student-mol-f4m
 **Created:** 2026-01-27
 **Status:** READY FOR REVIEW
 

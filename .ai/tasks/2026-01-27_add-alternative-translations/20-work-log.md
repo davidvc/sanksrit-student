@@ -1,7 +1,7 @@
 # Work Log
 
 **Task ID:** 2026-01-27_add-alternative-translations
-**Beads Task:** sanksrit-student-zkg
+**Beads Task:** sanskrit-student-zkg
 **Started:** 2026-01-27
 **Status:** Completed
 

@@ -19,8 +19,8 @@ A Sanskrit translation tool that provides word-by-word breakdowns and multiple t
 2. **Clone and install**
 
 ```bash
-git clone git@github.com:davidvc/sanksrit-student.git
-cd sanksrit-student
+git clone git@github.com:davidvc/sanskrit-student.git
+cd sanskrit-student
 npm install
 npm run build
 ```

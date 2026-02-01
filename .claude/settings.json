@@ -63,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /Users/dvancouvering/projects/sanksrit-student/.claude/hooks/session-start.py"
+            "command": "python3 /Users/dvancouvering/projects/sanskrit-student/.claude/hooks/session-start.py"
           }
         ]
       }
@@ -74,7 +74,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 /Users/dvancouvering/projects/sanksrit-student/.claude/hooks/session-end.py"
+            "command": "python3 /Users/dvancouvering/projects/sanskrit-student/.claude/hooks/session-end.py"
           }
         ]
       }
